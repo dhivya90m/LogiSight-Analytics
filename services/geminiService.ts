@@ -1,5 +1,6 @@
+
 import { GoogleGenAI } from "@google/genai";
-import { DeliveryRecord } from "../types";
+import { DeliveryRecord, DataModificationProposal } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -55,4 +56,54 @@ export const analyzeDataWithGemini = async (data: DeliveryRecord[], userQuery: s
     console.error("Gemini API Error:", error);
     return { answer: "Unable to analyze data at this time. Please check your API configuration.", sql: "" };
   }
+};
+
+/**
+ * Analyzes column headers and samples to provide business context and usage tips.
+ * Uses only metadata/samples, protecting full dataset privacy.
+ */
+export const generateColumnInsights = async (headers: string[], samples: any[]): Promise<Record<string, { description: string, kpiUtility: string, imputationTip: string }>> => {
+    try {
+        const context = {
+            headers,
+            samples: samples.slice(0, 3) // Only send 3 rows
+        };
+
+        const systemPrompt = `
+            You are a Data Architect for a logistics company (like DoorDash).
+            Analyze the provided column headers and sample data.
+            
+            For EACH column, provide:
+            1. Description: What the column represents.
+            2. KPI Utility: How it can be used for decision making or KPIs.
+            3. Imputation Tip: How to handle missing values (e.g., "Fill with 'Unknown'", "Calculate from timestamps").
+
+            Format as a JSON Object where the key is the exact column header name.
+            Example:
+            {
+                "Customer placed order date": {
+                    "description": "Date the order was initiated.",
+                    "kpiUtility": "Critical for Daily Volume analysis and seasonality trends.",
+                    "imputationTip": "Cannot impute reliably; consider dropping row."
+                }
+            }
+        `;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: JSON.stringify(context),
+            config: {
+                systemInstruction: systemPrompt,
+                responseMimeType: "application/json"
+            }
+        });
+        
+        const text = response.text;
+        if (!text) return {};
+        return JSON.parse(text);
+
+    } catch (error) {
+        console.error("Gemini Column Analysis Error:", error);
+        return {};
+    }
 };

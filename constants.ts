@@ -1,7 +1,20 @@
-import { DeliveryRecord } from './types';
 
-// Data derived from the provided image snapshot + generated synthetic data to fill charts
-export const INITIAL_DATA: DeliveryRecord[] = [
+import { DeliveryRecord, SchemaConfig } from './types';
+
+export const DEFAULT_SCHEMA: SchemaConfig = {
+    dateColumn: 'customerPlacedOrderDate',
+    timeColumn: 'customerPlacedOrderTime',
+    regionColumn: 'deliveryRegion',
+    totalTimeColumn: 'totalDeliveryTimeMinutes',
+    orderTotalColumn: 'orderTotal',
+    refundAmountColumn: 'refundedAmount',
+    restaurantIdColumn: 'restaurantId',
+    driverIdColumn: 'driverId',
+    prepTimeColumn: 'prepTimeMinutes',
+    driveTimeColumn: 'driveTimeMinutes'
+};
+
+const BASE_RECORDS: DeliveryRecord[] = [
   {
     id: '1',
     customerPlacedOrderDate: '2023-10-27',
@@ -133,94 +146,47 @@ export const INITIAL_DATA: DeliveryRecord[] = [
     percentTip: 0.06,
     refundedAmount: 0,
     refundPercentage: 0,
-  },
-  // Generated data to make charts meaningful
-  {
-    id: '101',
-    customerPlacedOrderDate: '2023-10-28',
-    customerPlacedOrderTime: '6:00:00 PM',
-    orderWithRestaurantTime: '18:10:00',
-    driverAtRestaurantTime: '18:15:00',
-    deliveredToConsumerDate: '2023-10-28',
-    deliveredToConsumerTime: '18:45:00',
-    totalDeliveryTimeMinutes: 45.0,
-    driverId: '400',
-    restaurantId: '50',
-    consumerId: '8888',
-    deliveryRegion: 'Mountain View',
-    isAsap: true,
-    orderTotal: 32.50,
-    amountOfDiscount: 0,
-    percentDiscount: 0,
-    amountOfTip: 4.50,
-    percentTip: 0.14,
-    refundedAmount: 0,
-    refundPercentage: 0,
-  },
-  {
-    id: '102',
-    customerPlacedOrderDate: '2023-10-28',
-    customerPlacedOrderTime: '7:15:00 PM',
-    orderWithRestaurantTime: '19:30:00',
-    driverAtRestaurantTime: '19:45:00',
-    deliveredToConsumerDate: '2023-10-28',
-    deliveredToConsumerTime: '20:30:00',
-    totalDeliveryTimeMinutes: 75.0,
-    driverId: '401',
-    restaurantId: '96',
-    consumerId: '9999',
-    deliveryRegion: 'Palo Alto',
-    isAsap: true,
-    orderTotal: 45.00,
-    amountOfDiscount: 0,
-    percentDiscount: 0,
-    amountOfTip: 0,
-    percentTip: 0,
-    refundedAmount: 45.00,
-    refundPercentage: 100,
-  },
-  {
-    id: '103',
-    customerPlacedOrderDate: '2023-10-28',
-    customerPlacedOrderTime: '12:00:00 PM',
-    orderWithRestaurantTime: '12:05:00',
-    driverAtRestaurantTime: '12:10:00',
-    deliveredToConsumerDate: '2023-10-28',
-    deliveredToConsumerTime: '12:35:00',
-    totalDeliveryTimeMinutes: 35.0,
-    driverId: '402',
-    restaurantId: '190',
-    consumerId: '7777',
-    deliveryRegion: 'San Jose',
-    isAsap: true,
-    orderTotal: 22.00,
-    amountOfDiscount: 2,
-    percentDiscount: 0.09,
-    amountOfTip: 3.00,
-    percentTip: 0.14,
-    refundedAmount: 0,
-    refundPercentage: 0,
-  },
-  {
-    id: '104',
-    customerPlacedOrderDate: '2023-10-28',
-    customerPlacedOrderTime: '1:00:00 PM',
-    orderWithRestaurantTime: '13:10:00',
-    driverAtRestaurantTime: '13:20:00',
-    deliveredToConsumerDate: '2023-10-28',
-    deliveredToConsumerTime: '14:50:00',
-    totalDeliveryTimeMinutes: 110.0,
-    driverId: '403',
-    restaurantId: '190',
-    consumerId: '6666',
-    deliveryRegion: 'San Jose',
-    isAsap: false,
-    orderTotal: 85.00,
-    amountOfDiscount: 0,
-    percentDiscount: 0,
-    amountOfTip: 10.00,
-    percentTip: 0.12,
-    refundedAmount: 20.00,
-    refundPercentage: 23,
   }
 ];
+
+const generateSyntheticData = (base: DeliveryRecord[], count: number): DeliveryRecord[] => {
+    const synthetic: DeliveryRecord[] = [...base];
+    const regions = ['Mountain View', 'Palo Alto', 'San Jose', 'Sunnyvale', 'Santa Clara', 'Redwood City'];
+    
+    for (let i = 0; i < count; i++) {
+        const template = base[i % base.length];
+        const randomFactor = Math.random();
+        
+        // Perturb values
+        const newTotal = Math.max(5, Number(template.orderTotal) + (Math.random() * 40 - 10));
+        const newTime = Math.max(15, Number(template.totalDeliveryTimeMinutes) + (Math.random() * 30 - 10));
+        const newRefund = randomFactor > 0.9 ? Math.random() * 50 : 0; // 10% chance of refund
+        const region = regions[Math.floor(Math.random() * regions.length)];
+        
+        // Randomize time slightly
+        let h = Math.floor(Math.random() * 24);
+        let m = Math.floor(Math.random() * 60);
+        const timeStr = `${h > 12 ? h-12 : (h===0?12:h)}:${String(m).padStart(2,'0')}:${String(Math.floor(Math.random()*60)).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+
+        synthetic.push({
+            ...template,
+            id: `${2000 + i}`,
+            driverId: `${300 + Math.floor(Math.random() * 100)}`,
+            restaurantId: `${10 + Math.floor(Math.random() * 50)}`,
+            deliveryRegion: region,
+            orderTotal: Number(newTotal.toFixed(2)),
+            totalDeliveryTimeMinutes: Number(newTime.toFixed(1)),
+            refundedAmount: Number(newRefund.toFixed(2)),
+            customerPlacedOrderTime: timeStr,
+            // Vary date between today and yesterday
+            customerPlacedOrderDate: i % 3 === 0 ? '2023-10-26' : '2023-10-27',
+            // Rough estimate for prep/drive split
+            prepTimeMinutes: Number((newTime * (0.2 + Math.random() * 0.2)).toFixed(1)),
+            driveTimeMinutes: Number((newTime * (0.5 + Math.random() * 0.3)).toFixed(1))
+        });
+    }
+    
+    return synthetic;
+};
+
+export const INITIAL_DATA: DeliveryRecord[] = generateSyntheticData(BASE_RECORDS, 144);

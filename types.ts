@@ -1,59 +1,63 @@
-export interface DeliveryRecord {
-  id: string;
-  // Timestamps & Dates
-  customerPlacedOrderDate: string;
-  customerPlacedOrderTime: string;
-  orderWithRestaurantTime: string; // New column from screenshot
-  driverAtRestaurantTime: string;
-  deliveredToConsumerDate: string;
-  deliveredToConsumerTime: string;
-  
-  // Metrics
-  totalDeliveryTimeMinutes: number;
-  
-  // Identifiers
-  driverId: string;
-  restaurantId: string;
-  consumerId: string;
-  deliveryRegion: string;
-  
-  // Details
-  isAsap: boolean;
-  
-  // Financials
-  orderTotal: number;
-  amountOfDiscount: number;
-  percentDiscount: number; // New
-  amountOfTip: number;
-  percentTip: number; // New
-  refundedAmount: number;
-  refundPercentage: number;
-  
-  // Engineered Features (Calculated)
-  prepTimeMinutes?: number;
-  driveTimeMinutes?: number;
-  dataQualityIssue?: string;
+
+export type DeliveryRecord = Record<string, any>;
+
+export interface SchemaConfig {
+  // Semantic Roles mapping to actual CSV/Excel Headers
+  dateColumn: string;
+  timeColumn: string;
+  regionColumn: string;
+  totalTimeColumn: string;
+  orderTotalColumn: string;
+  refundAmountColumn: string;
+  restaurantIdColumn: string;
+  driverIdColumn: string;
+  prepTimeColumn?: string;
+  driveTimeColumn?: string;
 }
 
 export interface KPIMetric {
   label: string;
   value: string;
-  change: number; // percentage
-  isPositive: boolean; // simplified trend
+  change: number; 
+  isPositive: boolean; 
 }
 
 export interface KPISettings {
-  maxAcceptablePrepTime: number; // minutes
-  maxAcceptableDriveTime: number; // minutes
-  highRefundThreshold: number; // dollars
-  lateDeliveryThreshold: number; // minutes
+  maxAcceptablePrepTime: number; 
+  maxAcceptableDriveTime: number; 
+  highRefundThreshold: number; 
+  lateDeliveryThreshold: number; 
 }
 
 export interface DataQualityReport {
   missingValues: number;
   duplicates: number;
   outliers: number;
-  score: number; // 0-100
+  score: number; 
+}
+
+export interface DataModificationProposal {
+  id: string;
+  type: 'CLEANING' | 'ENGINEERING' | 'IMPUTATION' | 'REMOVAL';
+  description: string;
+  reason: string;
+  affectedRows: number;
+  isSelected: boolean;
+  args?: any; 
+}
+
+export interface ColumnProfile {
+  name: string; 
+  mappedField: string; 
+  currentFormat: string;
+  expectedFormat: string;
+  missingCount: number;
+  invalidCount: number; 
+  sampleValue: string;
+  isFormatValid: boolean;
+  description?: string; 
+  kpiUtility?: string; 
+  imputationTip?: string; 
 }
 
 export enum AppView {
@@ -63,7 +67,8 @@ export enum AppView {
   AI_INSIGHTS = 'AI_INSIGHTS',
   IMPORT = 'IMPORT',
   ACTION_CENTER = 'ACTION_CENTER',
-  KPI_BUILDER = 'KPI_BUILDER'
+  KPI_BUILDER = 'KPI_BUILDER',
+  SQL_WORKBENCH = 'SQL_WORKBENCH'
 }
 
 export interface ActionItem {

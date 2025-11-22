@@ -1,6 +1,7 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { KPISettings } from '../types';
-import { Settings, Sliders, Save } from 'lucide-react';
+import { Settings, Sliders, Save, Check } from 'lucide-react';
 
 interface KPIBuilderProps {
   settings: KPISettings;
@@ -8,12 +9,26 @@ interface KPIBuilderProps {
 }
 
 export const KPIBuilder: React.FC<KPIBuilderProps> = ({ settings, onUpdate }) => {
-  
+  const [localSettings, setLocalSettings] = useState<KPISettings>(settings);
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Sync local state if props change from outside
+  useEffect(() => {
+    setLocalSettings(settings);
+  }, [settings]);
+
   const handleChange = (key: keyof KPISettings, value: number) => {
-    onUpdate({
-        ...settings,
+    setLocalSettings(prev => ({
+        ...prev,
         [key]: value
-    });
+    }));
+    setIsSaved(false);
+  };
+
+  const handleSave = () => {
+      onUpdate(localSettings);
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
   };
 
   return (
@@ -39,11 +54,11 @@ export const KPIBuilder: React.FC<KPIBuilderProps> = ({ settings, onUpdate }) =>
                     <div>
                         <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
                             <span>"Late Delivery" Threshold</span>
-                            <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{settings.lateDeliveryThreshold} mins</span>
+                            <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{localSettings.lateDeliveryThreshold} mins</span>
                         </label>
                         <input 
                             type="range" min="30" max="120" step="5"
-                            value={settings.lateDeliveryThreshold}
+                            value={localSettings.lateDeliveryThreshold}
                             onChange={(e) => handleChange('lateDeliveryThreshold', Number(e.target.value))}
                             className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                         />
@@ -53,11 +68,11 @@ export const KPIBuilder: React.FC<KPIBuilderProps> = ({ settings, onUpdate }) =>
                     <div>
                         <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
                             <span>Max Acceptable Prep Time</span>
-                            <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{settings.maxAcceptablePrepTime} mins</span>
+                            <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{localSettings.maxAcceptablePrepTime} mins</span>
                         </label>
                         <input 
                             type="range" min="5" max="60" step="1"
-                            value={settings.maxAcceptablePrepTime}
+                            value={localSettings.maxAcceptablePrepTime}
                             onChange={(e) => handleChange('maxAcceptablePrepTime', Number(e.target.value))}
                             className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                         />
@@ -74,11 +89,11 @@ export const KPIBuilder: React.FC<KPIBuilderProps> = ({ settings, onUpdate }) =>
                     <div>
                          <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
                             <span>High Refund Alert ($)</span>
-                            <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">${settings.highRefundThreshold}</span>
+                            <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">${localSettings.highRefundThreshold}</span>
                         </label>
                         <input 
                             type="range" min="10" max="200" step="5"
-                            value={settings.highRefundThreshold}
+                            value={localSettings.highRefundThreshold}
                             onChange={(e) => handleChange('highRefundThreshold', Number(e.target.value))}
                             className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                         />
@@ -88,11 +103,11 @@ export const KPIBuilder: React.FC<KPIBuilderProps> = ({ settings, onUpdate }) =>
                      <div>
                          <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
                             <span>Max Acceptable Drive Time</span>
-                            <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{settings.maxAcceptableDriveTime} mins</span>
+                            <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{localSettings.maxAcceptableDriveTime} mins</span>
                         </label>
                         <input 
                             type="range" min="10" max="90" step="5"
-                            value={settings.maxAcceptableDriveTime}
+                            value={localSettings.maxAcceptableDriveTime}
                             onChange={(e) => handleChange('maxAcceptableDriveTime', Number(e.target.value))}
                             className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                         />
@@ -102,8 +117,14 @@ export const KPIBuilder: React.FC<KPIBuilderProps> = ({ settings, onUpdate }) =>
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-                <button className="px-6 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition-colors flex items-center gap-2 shadow-sm">
-                    <Save size={18} /> Save Configuration
+                <button 
+                    onClick={handleSave}
+                    className={`px-6 py-2 rounded-lg transition-all flex items-center gap-2 shadow-sm ${
+                        isSaved ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-800 hover:bg-slate-900 text-white'
+                    }`}
+                >
+                    {isSaved ? <Check size={18} /> : <Save size={18} />}
+                    {isSaved ? 'Saved!' : 'Save Configuration'}
                 </button>
             </div>
         </div>
