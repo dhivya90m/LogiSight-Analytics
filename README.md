@@ -1,6 +1,18 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+LogiSight: AI-Driven Logistics Agent
+
+Objective: To automate the identification of delivery KPI fluctuations and provide SQL-backed root-cause insights for Weekly Business Reviews (WBR).
+
+
+The Problem: Traditional logistics reporting required manual deep-dives into raw data to explain KPI dips, leading to delayed responses to fulfillment friction.
+
+
+
+
+
+The Solution: Built a 0→1 agent that converts raw delivery data into actionable insights using SQL-backed monitoring tools.
+
+
+Impact: Streamlined the reporting cycle and provided a scalable framework for real-time health monitoring of logistics operations.
 
 # Run and deploy your AI Studio app
 
