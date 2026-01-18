@@ -71,6 +71,3 @@ View your app in AI Studio: https://ai.studio/apps/drive/1bwre0Ks38a61BkpCj1oze7
    🔗 Connect with Me
 Tech Journal: Dhivya’s Blog - LogiSight Deep Dive
 
-LinkedIn: Dhivya Marimuthu
-
-Portfolio: GitHub Profile
