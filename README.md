@@ -69,5 +69,5 @@ View your app in AI Studio: https://ai.studio/apps/drive/1bwre0Ks38a61BkpCj1oze7
    `npm run dev`
 
    🔗 Connect with Me
-Tech Journal: Dhivya’s Blog - LogiSight Deep Dive
+Tech Journal: Dhivya’s Blog - [LogiSight Deep Dive](https://dhivyatechjournal.blogspot.com/2025/11/ai-driven-logistics-kpi-agent-for.html)
 
